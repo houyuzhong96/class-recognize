@@ -886,6 +886,71 @@ textarea:focus-visible {
   line-height: 1.6;
 }
 
+.settings-signout {
+  display: flex;
+  max-width: 760px;
+  justify-content: flex-end;
+  margin: 18px auto 0;
+}
+
+.auth-page {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 80% 10%, #dfe9f2 0, transparent 30%),
+    var(--bg);
+}
+
+.auth-card {
+  display: grid;
+  width: min(100%, 420px);
+  gap: 14px;
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.auth-mark {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--accent);
+}
+
+.auth-card h1 {
+  margin: 4px 0 0;
+  font-size: 24px;
+}
+
+.auth-card > p {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.auth-card .field {
+  margin-bottom: 2px;
+}
+
+.form-message {
+  margin: 0;
+  color: #2c7547;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.form-message--error {
+  color: var(--danger);
+}
+
 .mobile-back,
 .app-navigation--mobile {
   display: none;
@@ -1034,6 +1099,18 @@ textarea:focus-visible {
 
   .settings-actions .button {
     justify-content: flex-start;
+  }
+
+  .settings-signout {
+    justify-content: stretch;
+  }
+
+  .settings-signout .button {
+    width: 100%;
+  }
+
+  .auth-card {
+    padding: 24px 18px;
   }
 
   .editor-panel {

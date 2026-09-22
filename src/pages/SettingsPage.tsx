@@ -5,16 +5,18 @@ import {
   Download,
   FileJson,
   FileText,
+  LogOut,
   RefreshCw,
   Wifi,
   WifiOff,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useWorkspace } from '../app/useWorkspace'
-import { isCloudConfigured } from '../data/supabase'
+import { isCloudConfigured, supabase } from '../data/supabase'
 
-export function SettingsPage() {
+export function SettingsPage({ email }: { email?: string }) {
   const { exportJson, exportMarkdown, refresh } = useWorkspace()
+  const authClient = supabase
   const [online, setOnline] = useState(
     typeof navigator === 'undefined' ? true : navigator.onLine,
   )
@@ -52,7 +54,9 @@ export function SettingsPage() {
             <strong>{isCloudConfigured ? '云端同步已配置' : '仅本机模式'}</strong>
             <span>
               {isCloudConfigured
-                ? '登录后，电脑和手机共用同一份数据。'
+                ? email
+                  ? `当前账号：${email}`
+                  : '登录后，电脑和手机共用同一份数据。'
                 : '记录保存在当前浏览器中，可通过导出文件备份。'}
             </span>
           </div>
@@ -110,6 +114,19 @@ export function SettingsPage() {
           导出的 JSON 可完整恢复记录字段，Markdown 适合长期阅读和归档。
         </p>
       </section>
+
+      {isCloudConfigured && authClient ? (
+        <div className="settings-signout">
+          <button
+            type="button"
+            className="button button--secondary"
+            onClick={() => void authClient.auth.signOut()}
+          >
+            <LogOut aria-hidden="true" size={18} />
+            退出登录
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }

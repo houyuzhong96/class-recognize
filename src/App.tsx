@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AppShell } from './components/AppShell'
 import type { AppPage } from './components/AppNavigation'
+import { AuthGate } from './app/AuthGate'
 import { WorkspaceProvider } from './app/WorkspaceContext'
 import { useWorkspace } from './app/useWorkspace'
 import { ArchivePage } from './pages/ArchivePage'
@@ -8,6 +9,7 @@ import { SearchPage } from './pages/SearchPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { WorkbenchPage } from './pages/WorkbenchPage'
 import type { LessonRecord } from './domain/types'
+import { isCloudConfigured } from './data/supabase'
 
 const syncLabels = {
   saved: '已保存',
@@ -16,7 +18,7 @@ const syncLabels = {
   error: '保存失败',
 } as const
 
-function AppContent() {
+function AppContent({ email }: { email?: string }) {
   const [currentPage, setCurrentPage] = useState<AppPage>('workbench')
   const [targetRecordId, setTargetRecordId] = useState<string>()
   const { records, syncState } = useWorkspace()
@@ -45,16 +47,20 @@ function AppContent() {
         <SearchPage records={records} onOpen={openRecord} />
       ) : null}
       {currentPage === 'archive' ? <ArchivePage onOpen={openRecord} /> : null}
-      {currentPage === 'settings' ? <SettingsPage /> : null}
+      {currentPage === 'settings' ? <SettingsPage email={email} /> : null}
     </AppShell>
   )
 }
 
 export function App() {
   return (
-    <WorkspaceProvider cloudEnabled={false}>
-      <AppContent />
-    </WorkspaceProvider>
+    <AuthGate>
+      {(session) => (
+        <WorkspaceProvider cloudEnabled={isCloudConfigured}>
+          <AppContent email={session?.user.email} />
+        </WorkspaceProvider>
+      )}
+    </AuthGate>
   )
 }
 

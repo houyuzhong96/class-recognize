@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { LessonRecord, LessonType } from '../domain/types'
 
 export interface CloudLessonRecord {
@@ -57,5 +58,71 @@ export function toCloudRecord(
     is_archived: record.isArchived,
     created_at: record.createdAt,
     updated_at: record.updatedAt,
+  }
+}
+
+export interface CloudRecordRepository {
+  listRecords(): Promise<LessonRecord[]>
+  getRecord(id: string): Promise<LessonRecord | undefined>
+  saveRecord(record: LessonRecord): Promise<LessonRecord>
+  setArchived(id: string, value: boolean): Promise<void>
+}
+
+function throwIfError(error: { message: string } | null) {
+  if (error) throw new Error(error.message)
+}
+
+export function createCloudRepository(
+  client: SupabaseClient,
+): CloudRecordRepository {
+  return {
+    async listRecords() {
+      const response = await client
+        .from('lesson_records')
+        .select('*')
+        .order('lesson_date', { ascending: false })
+      throwIfError(response.error)
+
+      return ((response.data ?? []) as CloudLessonRecord[]).map(fromCloudRecord)
+    },
+
+    async getRecord(id) {
+      const response = await client
+        .from('lesson_records')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle()
+      throwIfError(response.error)
+
+      return response.data
+        ? fromCloudRecord(response.data as CloudLessonRecord)
+        : undefined
+    },
+
+    async saveRecord(record) {
+      const response = await client
+        .from('lesson_records')
+        .upsert(toCloudRecord(record), { onConflict: 'id' })
+        .select('*')
+        .single()
+      throwIfError(response.error)
+
+      return fromCloudRecord(response.data as CloudLessonRecord)
+    },
+
+    async setArchived(id, value) {
+      const existing = await this.getRecord(id)
+      if (!existing) return
+
+      const response = await client
+        .from('lesson_records')
+        .update({
+          is_archived: value,
+          version: existing.version + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+      throwIfError(response.error)
+    },
   }
 }
