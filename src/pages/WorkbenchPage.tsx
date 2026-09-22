@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { ArrowLeft, BookOpenText, FileText } from 'lucide-react'
+import { ArrowLeft, BookOpenText } from 'lucide-react'
 import { BookTree } from '../components/BookTree'
 import { EmptyState } from '../components/EmptyState'
+import { RecordEditor } from '../components/RecordEditor'
 import { RecordList } from '../components/RecordList'
 import { seedCatalog } from '../data/catalog'
 import { useWorkspace } from '../app/useWorkspace'
@@ -26,9 +27,10 @@ function findSection(sectionId?: string) {
 }
 
 export function WorkbenchPage() {
-  const { records, saveRecord, syncState } = useWorkspace()
+  const { records, saveRecord, setArchived, syncState } = useWorkspace()
   const [selectedSectionId, setSelectedSectionId] = useState<string>()
   const [activeRecordId, setActiveRecordId] = useState<string>()
+  const [isCreating, setIsCreating] = useState(false)
   const selected = findSection(selectedSectionId)
   const sectionRecords = records.filter(
     (record) => record.sectionId === selectedSectionId && !record.isArchived,
@@ -43,24 +45,10 @@ export function WorkbenchPage() {
   function selectSection(sectionId: string) {
     setSelectedSectionId(sectionId)
     setActiveRecordId(undefined)
+    setIsCreating(false)
   }
 
-  async function createRecord() {
-    if (!selectedSectionId) return
-
-    const saved = await saveRecord({
-      sectionId: selectedSectionId,
-      lessonDate: new Date().toISOString().slice(0, 10),
-      lessonType: '新授课',
-      title: '',
-      teachingReflection: '',
-      teachingSummary: '',
-      studentMistakes: '',
-      improvementActions: '',
-      tags: [],
-    })
-    setActiveRecordId(saved.id)
-  }
+  const activeRecord = records.find((record) => record.id === activeRecordId)
 
   return (
     <div
@@ -68,7 +56,7 @@ export function WorkbenchPage() {
         selectedSectionId ? 'workbench-layout--has-section' : ''
       }`}
       data-sync-state={syncState}
-      data-record-active={Boolean(activeRecordId)}
+      data-record-active={Boolean(activeRecordId || isCreating)}
     >
       <aside className="book-panel">
         <div className="panel-heading panel-heading--compact">
@@ -96,18 +84,38 @@ export function WorkbenchPage() {
         <RecordList
           records={sectionRecords}
           sectionName={selected?.section.name}
-          onCreate={() => void createRecord()}
-          onOpen={(record) => setActiveRecordId(record.id)}
+          onCreate={() => {
+            setActiveRecordId(undefined)
+            setIsCreating(true)
+          }}
+          onOpen={(record) => {
+            setActiveRecordId(record.id)
+            setIsCreating(false)
+          }}
         />
       </section>
 
       <section className="editor-panel">
-        {activeRecordId ? (
-          <div className="editor-placeholder">
-            <FileText aria-hidden="true" size={28} strokeWidth={1.7} />
-            <strong>记录编辑器</strong>
-            <p>记录已创建，编辑器将在下一步接入。</p>
-          </div>
+        {selectedSectionId && (activeRecord || isCreating) ? (
+          <RecordEditor
+            sectionId={selectedSectionId}
+            record={activeRecord}
+            onClose={() => {
+              setActiveRecordId(undefined)
+              setIsCreating(false)
+            }}
+            onArchive={async (id) => {
+              await setArchived(id, true)
+              setActiveRecordId(undefined)
+              setIsCreating(false)
+            }}
+            onSave={async (recordInput) => {
+              const saved = await saveRecord(recordInput)
+              setActiveRecordId(saved.id)
+              setIsCreating(false)
+              return saved
+            }}
+          />
         ) : (
           <EmptyState
             icon={<BookOpenText size={28} strokeWidth={1.7} />}
