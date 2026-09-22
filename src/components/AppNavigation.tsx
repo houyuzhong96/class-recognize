@@ -31,7 +31,10 @@ export function AppNavigation({
   variant,
 }: AppNavigationProps) {
   return (
-    <nav className={`app-navigation app-navigation--${variant}`} aria-label="主要导航">
+    <nav
+      className={`app-navigation app-navigation--${variant}`}
+      aria-label={variant === 'desktop' ? '桌面导航' : '手机导航'}
+    >
       {navigationItems.map((item) => {
         const Icon = item.icon
         return (

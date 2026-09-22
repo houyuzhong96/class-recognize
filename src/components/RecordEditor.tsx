@@ -142,7 +142,11 @@ export function RecordEditor({
           </div>
         </div>
 
-        <span className={`save-status save-status--${saveState}`}>
+        <span
+          className={`save-status save-status--${saveState}`}
+          role="status"
+          aria-live="polite"
+        >
           {saveState === 'saving' ? (
             <LoaderCircle
               aria-hidden="true"

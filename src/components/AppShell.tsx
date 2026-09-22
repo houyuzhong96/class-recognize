@@ -37,7 +37,11 @@ export function AppShell({
           variant="desktop"
         />
 
-        <span className="sync-indicator">
+        <span
+          className="sync-indicator"
+          role="status"
+          aria-live="polite"
+        >
           <span className="sync-dot" aria-hidden="true" />
           {syncLabel}
         </span>
