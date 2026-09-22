@@ -33,15 +33,12 @@ function AppContent({ email }: { email?: string }) {
       currentPage={currentPage}
       onNavigate={(page) => {
         setCurrentPage(page)
-        if (page !== 'workbench') setTargetRecordId(undefined)
+        setTargetRecordId(undefined)
       }}
       syncLabel={syncLabels[syncState]}
     >
       {currentPage === 'workbench' ? (
-        <WorkbenchPage
-          targetRecordId={targetRecordId}
-          onTargetHandled={() => setTargetRecordId(undefined)}
-        />
+        <WorkbenchPage targetRecordId={targetRecordId} />
       ) : null}
       {currentPage === 'search' ? (
         <SearchPage records={records} onOpen={openRecord} />

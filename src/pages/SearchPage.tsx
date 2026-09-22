@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { FileSearch, SlidersHorizontal } from 'lucide-react'
 import { EmptyState } from '../components/EmptyState'
 import { seedCatalog } from '../data/catalog'
@@ -49,22 +49,18 @@ export function SearchPage({ records, onOpen }: SearchPageProps) {
 
   const chapters = seedCatalog.find((book) => book.id === bookId)?.chapters ?? []
 
-  const results = useMemo(
-    () =>
-      records
-        .filter((record) => !record.isArchived)
-        .filter((record) => matchesRecord(record, query))
-        .filter((record) => {
-          const location = sectionLookup.get(record.sectionId)
-          if (bookId && location?.bookId !== bookId) return false
-          if (chapterId && location?.chapterId !== chapterId) return false
-          if (startDate && record.lessonDate < startDate) return false
-          if (endDate && record.lessonDate > endDate) return false
-          return true
-        })
-        .sort((a, b) => b.lessonDate.localeCompare(a.lessonDate)),
-    [bookId, chapterId, endDate, query, records, startDate],
-  )
+  const results = records
+    .filter((record) => !record.isArchived)
+    .filter((record) => matchesRecord(record, query))
+    .filter((record) => {
+      const location = sectionLookup.get(record.sectionId)
+      if (bookId && location?.bookId !== bookId) return false
+      if (chapterId && location?.chapterId !== chapterId) return false
+      if (startDate && record.lessonDate < startDate) return false
+      if (endDate && record.lessonDate > endDate) return false
+      return true
+    })
+    .sort((a, b) => b.lessonDate.localeCompare(a.lessonDate))
 
   return (
     <div className="page-surface">

@@ -49,12 +49,6 @@ export function RecordList({
           icon={<Clock3 size={26} strokeWidth={1.7} />}
           title="还没有记录"
           description="记录本节课的总结、反思和学生易错点。"
-          action={
-            <button type="button" className="button button--primary" onClick={onCreate}>
-              <FilePlus2 aria-hidden="true" size={18} />
-              新建记录
-            </button>
-          }
         />
       ) : (
         <div className="record-items">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Archive, ArrowLeft, Check, LoaderCircle, Save } from 'lucide-react'
 import type { LessonRecord, LessonType, SyncState } from '../domain/types'
 import type { LessonRecordDraft } from '../data/repository'
@@ -52,28 +52,8 @@ export function RecordEditor({
   const [tagsInput, setTagsInput] = useState(record?.tags.join('、') ?? '')
   const [dirty, setDirty] = useState(false)
   const [saveState, setSaveState] = useState<SyncState>('saved')
-  const initialRender = useRef(true)
 
-  useEffect(() => {
-    setForm({
-      id: record?.id,
-      sectionId,
-      lessonDate: record?.lessonDate ?? today(),
-      lessonType: record?.lessonType ?? '新授课',
-      title: record?.title ?? '',
-      teachingReflection: record?.teachingReflection ?? '',
-      teachingSummary: record?.teachingSummary ?? '',
-      studentMistakes: record?.studentMistakes ?? '',
-      improvementActions: record?.improvementActions ?? '',
-      tags: record?.tags ?? [],
-    })
-    setTagsInput(record?.tags.join('、') ?? '')
-    setDirty(false)
-    setSaveState('saved')
-    initialRender.current = true
-  }, [record, sectionId])
-
-  async function persist() {
+  const persist = useCallback(async () => {
     setSaveState('saving')
     try {
       await onSave({
@@ -85,13 +65,9 @@ export function RecordEditor({
     } catch {
       setSaveState('error')
     }
-  }
+  }, [form, onSave, tagsInput])
 
   useEffect(() => {
-    if (initialRender.current) {
-      initialRender.current = false
-      return
-    }
     if (!dirty) return
 
     const timer = window.setTimeout(() => {
@@ -99,7 +75,7 @@ export function RecordEditor({
     }, 800)
 
     return () => window.clearTimeout(timer)
-  }, [dirty, form, tagsInput])
+  }, [dirty, persist])
 
   function updateField<Key extends keyof LessonRecordDraft>(
     key: Key,

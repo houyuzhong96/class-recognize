@@ -959,6 +959,7 @@ textarea:focus-visible {
 @media (max-width: 900px) {
   .app-shell {
     grid-template-rows: 56px minmax(0, 1fr) 62px;
+    height: 100dvh;
   }
 
   .app-header {

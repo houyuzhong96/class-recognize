@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -30,17 +29,7 @@ import {
   recordsToMarkdown,
 } from '../domain/export'
 import type { LessonRecord, SyncState } from '../domain/types'
-
-export interface WorkspaceValue {
-  records: LessonRecord[]
-  isLoading: boolean
-  syncState: SyncState
-  saveRecord(input: LessonRecordDraft): Promise<LessonRecord>
-  setArchived(id: string, value: boolean): Promise<void>
-  refresh(): Promise<void>
-  exportJson(): void
-  exportMarkdown(): void
-}
+import { WorkspaceContext, type WorkspaceValue } from './workspaceContextValue'
 
 interface WorkspaceProviderProps {
   children: ReactNode
@@ -48,10 +37,6 @@ interface WorkspaceProviderProps {
   cloudEnabled?: boolean
   repository?: ReflectionRepository
 }
-
-export const WorkspaceContext = createContext<WorkspaceValue | undefined>(
-  undefined,
-)
 
 function currentSyncState(cloudEnabled: boolean): SyncState {
   if (typeof navigator !== 'undefined' && !navigator.onLine) return 'offline'
@@ -86,7 +71,6 @@ export function WorkspaceProvider({
     [cloudRepository, repository],
   )
   const [records, setRecords] = useState<LessonRecord[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [syncState, setSyncState] = useState<SyncState>(
     currentSyncState(cloudEnabled),
   )
@@ -126,11 +110,9 @@ export function WorkspaceProvider({
   }, [cloudRepository, queue, repository, syncPort])
 
   useEffect(() => {
-    let active = true
-
-    void refresh().finally(() => {
-      if (active) setIsLoading(false)
-    })
+    // Initial loading reads from IndexedDB and optionally Supabase.
+    // oxlint-disable-next-line react/set-state-in-effect
+    void refresh()
 
     const handleOffline = () => setSyncState('offline')
     const handleOnline = () => {
@@ -141,7 +123,6 @@ export function WorkspaceProvider({
     window.addEventListener('online', handleOnline)
 
     return () => {
-      active = false
       window.removeEventListener('offline', handleOffline)
       window.removeEventListener('online', handleOnline)
     }
@@ -223,7 +204,6 @@ export function WorkspaceProvider({
   const value = useMemo<WorkspaceValue>(
     () => ({
       records,
-      isLoading,
       syncState,
       saveRecord,
       setArchived,
@@ -243,7 +223,7 @@ export function WorkspaceProvider({
         )
       },
     }),
-    [isLoading, records, refresh, saveRecord, setArchived, syncState],
+    [records, refresh, saveRecord, setArchived, syncState],
   )
 
   return (
