@@ -3,7 +3,11 @@ import { AppShell } from './components/AppShell'
 import type { AppPage } from './components/AppNavigation'
 import { WorkspaceProvider } from './app/WorkspaceContext'
 import { useWorkspace } from './app/useWorkspace'
+import { ArchivePage } from './pages/ArchivePage'
+import { SearchPage } from './pages/SearchPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { WorkbenchPage } from './pages/WorkbenchPage'
+import type { LessonRecord } from './domain/types'
 
 const syncLabels = {
   saved: '已保存',
@@ -14,24 +18,34 @@ const syncLabels = {
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<AppPage>('workbench')
-  const { syncState } = useWorkspace()
+  const [targetRecordId, setTargetRecordId] = useState<string>()
+  const { records, syncState } = useWorkspace()
+
+  function openRecord(record: LessonRecord) {
+    setTargetRecordId(record.id)
+    setCurrentPage('workbench')
+  }
 
   return (
     <AppShell
       currentPage={currentPage}
-      onNavigate={setCurrentPage}
+      onNavigate={(page) => {
+        setCurrentPage(page)
+        if (page !== 'workbench') setTargetRecordId(undefined)
+      }}
       syncLabel={syncLabels[syncState]}
     >
-      {currentPage === 'workbench' ? <WorkbenchPage /> : null}
+      {currentPage === 'workbench' ? (
+        <WorkbenchPage
+          targetRecordId={targetRecordId}
+          onTargetHandled={() => setTargetRecordId(undefined)}
+        />
+      ) : null}
       {currentPage === 'search' ? (
-        <div className="page-placeholder">搜索功能将在下一步接入。</div>
+        <SearchPage records={records} onOpen={openRecord} />
       ) : null}
-      {currentPage === 'archive' ? (
-        <div className="page-placeholder">归档记录将在下一步接入。</div>
-      ) : null}
-      {currentPage === 'settings' ? (
-        <div className="page-placeholder">本机模式已启用。</div>
-      ) : null}
+      {currentPage === 'archive' ? <ArchivePage onOpen={openRecord} /> : null}
+      {currentPage === 'settings' ? <SettingsPage /> : null}
     </AppShell>
   )
 }

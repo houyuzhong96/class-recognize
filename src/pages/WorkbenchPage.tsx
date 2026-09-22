@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, BookOpenText } from 'lucide-react'
 import { BookTree } from '../components/BookTree'
 import { EmptyState } from '../components/EmptyState'
@@ -26,7 +26,15 @@ function findSection(sectionId?: string) {
   return undefined
 }
 
-export function WorkbenchPage() {
+interface WorkbenchPageProps {
+  targetRecordId?: string
+  onTargetHandled?(): void
+}
+
+export function WorkbenchPage({
+  targetRecordId,
+  onTargetHandled,
+}: WorkbenchPageProps) {
   const { records, saveRecord, setArchived, syncState } = useWorkspace()
   const [selectedSectionId, setSelectedSectionId] = useState<string>()
   const [activeRecordId, setActiveRecordId] = useState<string>()
@@ -49,6 +57,17 @@ export function WorkbenchPage() {
   }
 
   const activeRecord = records.find((record) => record.id === activeRecordId)
+
+  useEffect(() => {
+    if (!targetRecordId) return
+    const target = records.find((record) => record.id === targetRecordId)
+    if (!target) return
+
+    setSelectedSectionId(target.sectionId)
+    setActiveRecordId(target.id)
+    setIsCreating(false)
+    onTargetHandled?.()
+  }, [onTargetHandled, records, targetRecordId])
 
   return (
     <div
