@@ -1,18 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { LessonRecord, LessonType } from '../domain/types'
+import type { LessonRecord } from '../domain/types'
 
 export interface CloudLessonRecord {
   id: string
   owner_id: string
   section_id: string
-  lesson_date: string
-  lesson_type: LessonType
-  title: string
-  teaching_reflection: string
   teaching_summary: string
   student_mistakes: string
-  improvement_actions: string
-  tags: string[]
+  teaching_reflection: string
+  classic_example: string
   version: number
   is_archived: boolean
   created_at: string
@@ -25,14 +21,10 @@ export function fromCloudRecord(record: CloudLessonRecord): LessonRecord {
   return {
     id: record.id,
     sectionId: record.section_id,
-    lessonDate: record.lesson_date,
-    lessonType: record.lesson_type,
-    title: record.title,
-    teachingReflection: record.teaching_reflection,
     teachingSummary: record.teaching_summary,
     studentMistakes: record.student_mistakes,
-    improvementActions: record.improvement_actions,
-    tags: record.tags,
+    teachingReflection: record.teaching_reflection,
+    classicExample: record.classic_example,
     version: record.version,
     isArchived: record.is_archived,
     createdAt: record.created_at,
@@ -46,14 +38,10 @@ export function toCloudRecord(
   return {
     id: record.id,
     section_id: record.sectionId,
-    lesson_date: record.lessonDate,
-    lesson_type: record.lessonType,
-    title: record.title,
-    teaching_reflection: record.teachingReflection,
     teaching_summary: record.teachingSummary,
     student_mistakes: record.studentMistakes,
-    improvement_actions: record.improvementActions,
-    tags: record.tags,
+    teaching_reflection: record.teachingReflection,
+    classic_example: record.classicExample,
     version: record.version,
     is_archived: record.isArchived,
     created_at: record.createdAt,
@@ -80,7 +68,7 @@ export function createCloudRepository(
       const response = await client
         .from('lesson_records')
         .select('*')
-        .order('lesson_date', { ascending: false })
+        .order('updated_at', { ascending: false })
       throwIfError(response.error)
 
       return ((response.data ?? []) as CloudLessonRecord[]).map(fromCloudRecord)

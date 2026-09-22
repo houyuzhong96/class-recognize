@@ -135,7 +135,7 @@ export function WorkspaceProvider({
       setRecords((current) => {
         const withoutSaved = current.filter((record) => record.id !== saved.id)
         return [saved, ...withoutSaved].sort((a, b) =>
-          b.lessonDate.localeCompare(a.lessonDate),
+          b.updatedAt.localeCompare(a.updatedAt),
         )
       })
 

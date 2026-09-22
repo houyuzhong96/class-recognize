@@ -43,14 +43,10 @@ function toRecord(
   return {
     id: input.id ?? existing?.id ?? crypto.randomUUID(),
     sectionId: input.sectionId,
-    lessonDate: input.lessonDate,
-    lessonType: input.lessonType,
-    title: input.title,
-    teachingReflection: input.teachingReflection,
     teachingSummary: input.teachingSummary,
     studentMistakes: input.studentMistakes,
-    improvementActions: input.improvementActions,
-    tags: input.tags,
+    teachingReflection: input.teachingReflection,
+    classicExample: input.classicExample,
     version: (existing?.version ?? input.version ?? 0) + 1,
     isArchived: input.isArchived ?? existing?.isArchived ?? false,
     createdAt: existing?.createdAt ?? input.createdAt ?? now,
@@ -65,10 +61,7 @@ export function createLocalRepository(
     async listRecords() {
       const database = await openDatabase(databaseName)
       const records = await database.getAll('records')
-      return records.sort((a, b) => {
-        const dateOrder = b.lessonDate.localeCompare(a.lessonDate)
-        return dateOrder || b.updatedAt.localeCompare(a.updatedAt)
-      })
+      return records.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     },
 
     async getRecord(id) {

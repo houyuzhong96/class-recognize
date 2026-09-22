@@ -1,5 +1,3 @@
-export type LessonType = '新授课' | '习题课' | '复习课' | '讲评课' | '其他'
-
 export interface Section {
   id: string
   chapterId: string
@@ -26,14 +24,10 @@ export interface Textbook {
 export interface LessonRecord {
   id: string
   sectionId: string
-  lessonDate: string
-  lessonType: LessonType
-  title: string
-  teachingReflection: string
   teachingSummary: string
   studentMistakes: string
-  improvementActions: string
-  tags: string[]
+  teachingReflection: string
+  classicExample: string
   version: number
   isArchived: boolean
   createdAt: string

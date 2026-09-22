@@ -14,14 +14,10 @@ function Harness() {
         onClick={() =>
           void saveRecord({
             sectionId: 'section-1-1-1',
-            lessonDate: '2026-09-22',
-            lessonType: '新授课',
-            title: '集合概念',
+            teachingSummary: '<p>理论完成概念讲解</p>',
+            studentMistakes: '<p>混淆空集</p>',
             teachingReflection: '',
-            teachingSummary: '完成概念讲解',
-            studentMistakes: '',
-            improvementActions: '',
-            tags: [],
+            classicExample: '<p>集合概念例题</p>',
           })
         }
       >

@@ -7,14 +7,10 @@ import { SearchPage } from './SearchPage'
 const record: LessonRecord = {
   id: 'record-1',
   sectionId: 'section-3-1-1',
-  lessonDate: '2026-09-22',
-  lessonType: '新授课',
-  title: '函数单调性',
-  teachingSummary: '完成定义证明',
+  teachingSummary: '<p>函数单调性定义证明</p>',
+  studentMistakes: '<p>忽略定义域</p>',
   teachingReflection: '数形结合',
-  studentMistakes: '忽略定义域',
-  improvementActions: '',
-  tags: ['函数'],
+  classicExample: '<p>判断函数单调性</p>',
   version: 1,
   isArchived: false,
   createdAt: '2026-09-22T00:00:00.000Z',
@@ -26,7 +22,7 @@ it('filters records by Chinese keyword', async () => {
   render(<SearchPage records={[record]} onOpen={onOpen} />)
 
   await userEvent.type(screen.getByRole('searchbox'), '定义域')
-  expect(screen.getByText('函数单调性')).toBeInTheDocument()
-  await userEvent.click(screen.getByText('函数单调性'))
+  expect(screen.getByText('函数单调性定义证明')).toBeInTheDocument()
+  await userEvent.click(screen.getByText('函数单调性定义证明'))
   expect(onOpen).toHaveBeenCalledWith(record)
 })

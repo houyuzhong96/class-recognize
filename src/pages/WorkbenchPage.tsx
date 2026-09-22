@@ -106,6 +106,7 @@ export function WorkbenchPage({ targetRecordId }: WorkbenchPageProps) {
       <section className="editor-panel">
         {selectedSectionId && (activeRecord || isCreating) ? (
           <RecordEditor
+            key={activeRecord?.id ?? 'new-record'}
             sectionId={selectedSectionId}
             record={activeRecord}
             onClose={() => {

@@ -3,6 +3,7 @@ import { FileSearch, SlidersHorizontal } from 'lucide-react'
 import { EmptyState } from '../components/EmptyState'
 import { seedCatalog } from '../data/catalog'
 import { matchesRecord } from '../domain/search'
+import { richTextToPlainText } from '../domain/richText'
 import type { LessonRecord } from '../domain/types'
 
 interface SearchPageProps {
@@ -44,8 +45,6 @@ export function SearchPage({ records, onOpen }: SearchPageProps) {
   const [query, setQuery] = useState('')
   const [bookId, setBookId] = useState('')
   const [chapterId, setChapterId] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
 
   const chapters = seedCatalog.find((book) => book.id === bookId)?.chapters ?? []
 
@@ -56,11 +55,9 @@ export function SearchPage({ records, onOpen }: SearchPageProps) {
       const location = sectionLookup.get(record.sectionId)
       if (bookId && location?.bookId !== bookId) return false
       if (chapterId && location?.chapterId !== chapterId) return false
-      if (startDate && record.lessonDate < startDate) return false
-      if (endDate && record.lessonDate > endDate) return false
       return true
     })
-    .sort((a, b) => b.lessonDate.localeCompare(a.lessonDate))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 
   return (
     <div className="page-surface">
@@ -78,7 +75,7 @@ export function SearchPage({ records, onOpen }: SearchPageProps) {
           <input
             type="search"
             value={query}
-            placeholder="搜索易错点、教学反思或标签"
+            placeholder="搜索总结、易错点、反思或经典例题"
             onChange={(event) => setQuery(event.target.value)}
           />
         </label>
@@ -117,28 +114,11 @@ export function SearchPage({ records, onOpen }: SearchPageProps) {
           </select>
         </label>
 
-        <label className="field">
-          <span>开始日期</span>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
-          />
-        </label>
-
-        <label className="field">
-          <span>结束日期</span>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(event) => setEndDate(event.target.value)}
-          />
-        </label>
       </div>
 
       <div className="result-heading">
         <strong>{results.length} 条记录</strong>
-        <span>按上课日期倒序</span>
+        <span>按最近更新排序</span>
       </div>
 
       {results.length === 0 ? (
@@ -158,14 +138,22 @@ export function SearchPage({ records, onOpen }: SearchPageProps) {
                 className="search-result"
                 onClick={() => onOpen(record)}
               >
-                <span className="search-result__date">{record.lessonDate}</span>
                 <span className="search-result__content">
-                  <strong>{record.title || record.lessonType}</strong>
+                  <strong>
+                    {richTextToPlainText(record.teachingSummary).slice(0, 58) ||
+                      '未填写教学总结'}
+                  </strong>
                   <span>
                     {location
                       ? `${location.bookName} / ${location.chapterName} / ${location.sectionName}`
                       : '未知章节'}
                   </span>
+                  {record.studentMistakes ? (
+                    <span className="search-result__excerpt">
+                      易错点：
+                      {richTextToPlainText(record.studentMistakes).slice(0, 70)}
+                    </span>
+                  ) : null}
                 </span>
               </button>
             )

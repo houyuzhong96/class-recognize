@@ -14,6 +14,6 @@ export function mergeRecords(
   }
 
   return [...merged.values()].sort(
-    (a, b) => b.lessonDate.localeCompare(a.lessonDate),
+    (a, b) => b.updatedAt.localeCompare(a.updatedAt),
   )
 }

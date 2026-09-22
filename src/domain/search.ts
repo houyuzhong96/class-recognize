@@ -1,4 +1,5 @@
 import type { LessonRecord } from './types'
+import { richTextToPlainText } from './richText'
 
 export function normalizeSearchText(value: string): string {
   return value
@@ -12,13 +13,10 @@ export function matchesRecord(record: LessonRecord, query: string): boolean {
   if (!needle) return true
 
   const searchableText = [
-    record.title,
-    record.lessonType,
-    record.teachingReflection,
-    record.teachingSummary,
-    record.studentMistakes,
-    record.improvementActions,
-    record.tags.join(' '),
+    richTextToPlainText(record.teachingSummary),
+    richTextToPlainText(record.studentMistakes),
+    richTextToPlainText(record.teachingReflection),
+    richTextToPlainText(record.classicExample),
   ].join(' ')
 
   return normalizeSearchText(searchableText).includes(needle)

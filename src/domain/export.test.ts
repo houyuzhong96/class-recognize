@@ -5,14 +5,10 @@ import { recordsToJson, recordsToMarkdown } from './export'
 const record: LessonRecord = {
   id: 'record-1',
   sectionId: 'section-3-1-1',
-  lessonDate: '2026-09-22',
-  lessonType: '新授课',
-  title: '函数单调性',
-  teachingSummary: '完成定义证明',
+  teachingSummary: '<p>完成定义证明</p>',
+  studentMistakes: '<p>忽略定义域</p>',
   teachingReflection: '例题顺序需要调整',
-  studentMistakes: '忽略定义域',
-  improvementActions: '增加区间判断练习',
-  tags: ['函数'],
+  classicExample: '<p>判断函数在区间上的单调性</p>',
   version: 1,
   isArchived: false,
   createdAt: '2026-09-22T00:00:00.000Z',
@@ -27,14 +23,15 @@ describe('data export', () => {
     }
 
     expect(exported.version).toBe(1)
-    expect(exported.records[0].studentMistakes).toBe('忽略定义域')
+    expect(exported.records[0].studentMistakes).toBe('<p>忽略定义域</p>')
   })
 
   it('renders readable markdown sections', () => {
     const markdown = recordsToMarkdown([record])
 
-    expect(markdown).toContain('## 2026-09-22 函数单调性')
+    expect(markdown).toContain('## 完成定义证明')
     expect(markdown).toContain('### 学生易错点')
     expect(markdown).toContain('忽略定义域')
+    expect(markdown).toContain('### 经典例题')
   })
 })

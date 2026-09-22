@@ -1,5 +1,6 @@
 import { AlertCircle, Clock3, FilePlus2 } from 'lucide-react'
 import type { LessonRecord } from '../domain/types'
+import { richTextToPlainText } from '../domain/richText'
 import { EmptyState } from './EmptyState'
 
 interface RecordListProps {
@@ -10,7 +11,7 @@ interface RecordListProps {
 }
 
 function excerpt(value: string, fallback: string) {
-  const normalized = value.trim().replace(/\s+/g, ' ')
+  const normalized = richTextToPlainText(value)
   if (!normalized) return fallback
   return normalized.length > 60 ? `${normalized.slice(0, 60)}...` : normalized
 }
@@ -59,14 +60,20 @@ export function RecordList({
               key={record.id}
               onClick={() => onOpen(record)}
             >
-              <span className="record-date">{record.lessonDate}</span>
-              <strong>{record.title || record.lessonType}</strong>
-              <span className="record-type">{record.lessonType}</span>
-              <p>{excerpt(record.teachingSummary, '暂未填写教学总结')}</p>
+              <strong>
+                {excerpt(record.teachingSummary, '未填写教学总结')}
+              </strong>
+              <p>{excerpt(record.teachingReflection, '暂未填写教学反思')}</p>
               {record.studentMistakes ? (
                 <span className="record-mistake">
                   <AlertCircle aria-hidden="true" size={15} />
                   {excerpt(record.studentMistakes, '')}
+                </span>
+              ) : null}
+              {record.classicExample ? (
+                <span className="record-example">
+                  <FilePlus2 aria-hidden="true" size={15} />
+                  {excerpt(record.classicExample, '')}
                 </span>
               ) : null}
             </button>

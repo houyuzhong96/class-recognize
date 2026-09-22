@@ -51,14 +51,10 @@ create table if not exists public.lesson_records (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   section_id text not null,
-  lesson_date date not null,
-  lesson_type text not null,
-  title text not null default '',
-  teaching_reflection text not null default '',
   teaching_summary text not null default '',
   student_mistakes text not null default '',
-  improvement_actions text not null default '',
-  tags text[] not null default '{}',
+  teaching_reflection text not null default '',
+  classic_example text not null default '',
   version integer not null default 1,
   is_archived boolean not null default false,
   created_at timestamptz not null default now(),
@@ -70,8 +66,8 @@ create table if not exists public.lesson_records (
 create index if not exists lesson_records_owner_section_idx
 on public.lesson_records (owner_id, section_id);
 
-create index if not exists lesson_records_owner_date_idx
-on public.lesson_records (owner_id, lesson_date desc);
+create index if not exists lesson_records_owner_updated_idx
+on public.lesson_records (owner_id, updated_at desc);
 
 create table if not exists public.record_revisions (
   id uuid primary key default gen_random_uuid(),

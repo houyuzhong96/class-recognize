@@ -6,19 +6,16 @@ describe('localRepository', () => {
     const repository = createLocalRepository(`test-${crypto.randomUUID()}`)
     const saved = await repository.saveRecord({
       sectionId: 'section-1-1-1',
-      lessonDate: '2026-09-22',
-      lessonType: '新授课',
-      title: '集合概念',
+      teachingSummary: '<p>完成集合定义和元素特性</p>',
+      studentMistakes: '<p>混淆空集和含零集合</p>',
       teachingReflection: '例子需要更贴近生活',
-      teachingSummary: '完成集合定义和元素特性',
-      studentMistakes: '混淆空集和含零集合',
-      improvementActions: '增加反例辨析',
-      tags: ['集合'],
+      classicExample: '<p>判断集合与元素的关系</p>',
     })
 
     await expect(repository.getRecord(saved.id)).resolves.toMatchObject({
-      title: '集合概念',
-      studentMistakes: '混淆空集和含零集合',
+      teachingSummary: '<p>完成集合定义和元素特性</p>',
+      studentMistakes: '<p>混淆空集和含零集合</p>',
+      classicExample: '<p>判断集合与元素的关系</p>',
       version: 1,
     })
   })
@@ -27,24 +24,20 @@ describe('localRepository', () => {
     const repository = createLocalRepository(`test-${crypto.randomUUID()}`)
     const saved = await repository.saveRecord({
       sectionId: 'section-1-1-1',
-      lessonDate: '2026-09-22',
-      lessonType: '新授课',
-      title: '集合概念',
-      teachingReflection: '',
-      teachingSummary: '',
+      teachingSummary: '<p>集合概念</p>',
       studentMistakes: '',
-      improvementActions: '',
-      tags: [],
+      teachingReflection: '',
+      classicExample: '',
     })
 
     const updated = await repository.saveRecord({
       ...saved,
-      title: '集合概念辨析',
+      teachingSummary: '<p>集合概念辨析</p>',
     })
     await repository.setArchived(updated.id, true)
 
     await expect(repository.getRecord(updated.id)).resolves.toMatchObject({
-      title: '集合概念辨析',
+      teachingSummary: '<p>集合概念辨析</p>',
       version: 3,
       isArchived: true,
     })

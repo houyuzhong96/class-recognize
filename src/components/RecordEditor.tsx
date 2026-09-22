@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Archive, ArrowLeft, Check, LoaderCircle, Save } from 'lucide-react'
-import type { LessonRecord, LessonType, SyncState } from '../domain/types'
+import type { LessonRecord, SyncState } from '../domain/types'
 import type { LessonRecordDraft } from '../data/repository'
+import { richTextToPlainText } from '../domain/richText'
+import { RichTextEditor } from './RichTextEditor'
 
 interface RecordEditorProps {
   sectionId: string
@@ -9,25 +11,6 @@ interface RecordEditorProps {
   onSave(input: LessonRecordDraft): Promise<LessonRecord | void>
   onArchive(id: string): Promise<void>
   onClose?(): void
-}
-
-const lessonTypes: LessonType[] = [
-  '新授课',
-  '习题课',
-  '复习课',
-  '讲评课',
-  '其他',
-]
-
-function today() {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function tagsFromInput(value: string): string[] {
-  return value
-    .split(/[，,、]/)
-    .map((tag) => tag.trim())
-    .filter(Boolean)
 }
 
 export function RecordEditor({
@@ -40,46 +23,42 @@ export function RecordEditor({
   const [form, setForm] = useState<LessonRecordDraft>(() => ({
     id: record?.id,
     sectionId,
-    lessonDate: record?.lessonDate ?? today(),
-    lessonType: record?.lessonType ?? '新授课',
-    title: record?.title ?? '',
-    teachingReflection: record?.teachingReflection ?? '',
     teachingSummary: record?.teachingSummary ?? '',
     studentMistakes: record?.studentMistakes ?? '',
-    improvementActions: record?.improvementActions ?? '',
-    tags: record?.tags ?? [],
+    teachingReflection: record?.teachingReflection ?? '',
+    classicExample: record?.classicExample ?? '',
   }))
-  const [tagsInput, setTagsInput] = useState(record?.tags.join('、') ?? '')
   const [dirty, setDirty] = useState(false)
   const [saveState, setSaveState] = useState<SyncState>('saved')
 
   const persist = useCallback(async () => {
     setSaveState('saving')
     try {
-      await onSave({
-        ...form,
-        tags: tagsFromInput(tagsInput),
-      })
+      await onSave(form)
       setDirty(false)
       setSaveState('saved')
     } catch {
       setSaveState('error')
     }
-  }, [form, onSave, tagsInput])
+  }, [form, onSave])
 
   useEffect(() => {
     if (!dirty) return
 
     const timer = window.setTimeout(() => {
       void persist()
-    }, 800)
+    }, 900)
 
     return () => window.clearTimeout(timer)
   }, [dirty, persist])
 
-  function updateField<Key extends keyof LessonRecordDraft>(
-    key: Key,
-    value: LessonRecordDraft[Key],
+  function updateField(
+    key:
+      | 'teachingSummary'
+      | 'studentMistakes'
+      | 'teachingReflection'
+      | 'classicExample',
+    value: string,
   ) {
     setForm((current) => ({ ...current, [key]: value }))
     setDirty(true)
@@ -91,6 +70,8 @@ export function RecordEditor({
     offline: '等待联网',
     error: '保存失败，可重试',
   }[saveState]
+  const heading =
+    richTextToPlainText(form.teachingSummary).slice(0, 36) || '课次记录'
 
   return (
     <form
@@ -114,7 +95,7 @@ export function RecordEditor({
           ) : null}
           <div>
             <span>{record ? '编辑课次记录' : '新建课次记录'}</span>
-            <h2>{form.title || '未命名记录'}</h2>
+            <h2>{heading}</h2>
           </div>
         </div>
 
@@ -124,11 +105,7 @@ export function RecordEditor({
           aria-live="polite"
         >
           {saveState === 'saving' ? (
-            <LoaderCircle
-              aria-hidden="true"
-              className="spin"
-              size={15}
-            />
+            <LoaderCircle aria-hidden="true" className="spin" size={15} />
           ) : (
             <Check aria-hidden="true" size={15} />
           )}
@@ -136,101 +113,35 @@ export function RecordEditor({
         </span>
       </header>
 
-      <div className="editor-grid editor-grid--compact">
-        <label className="field">
-          <span>日期</span>
-          <input
-            type="date"
-            value={form.lessonDate}
-            onChange={(event) => updateField('lessonDate', event.target.value)}
-          />
-        </label>
-
-        <label className="field">
-          <span>课型</span>
-          <select
-            value={form.lessonType}
-            onChange={(event) =>
-              updateField('lessonType', event.target.value as LessonType)
-            }
-          >
-            {lessonTypes.map((lessonType) => (
-              <option key={lessonType} value={lessonType}>
-                {lessonType}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <label className="field">
-        <span>标题</span>
-        <input
-          value={form.title}
-          placeholder="例如：函数单调性第一课时"
-          onChange={(event) => updateField('title', event.target.value)}
-        />
-      </label>
-
-      <label className="field">
-        <span>教学总结</span>
-        <textarea
+      <div className="rich-field-stack">
+        <RichTextEditor
+          label="教学总结"
           value={form.teachingSummary}
-          rows={5}
-          placeholder="本节课完成了哪些内容，学生掌握情况如何？"
-          onChange={(event) =>
-            updateField('teachingSummary', event.target.value)
-          }
+          placeholder="记录本节完成了哪些内容，学生掌握情况如何。"
+          onChange={(value) => updateField('teachingSummary', value)}
         />
-      </label>
 
-      <label className="field">
-        <span>教学反思</span>
-        <textarea
-          value={form.teachingReflection}
-          rows={5}
-          placeholder="哪些环节有效，哪些处理需要调整？"
-          onChange={(event) =>
-            updateField('teachingReflection', event.target.value)
-          }
-        />
-      </label>
-
-      <label className="field field--warning">
-        <span>学生易错点</span>
-        <textarea
+        <RichTextEditor
+          label="学生易错点"
           value={form.studentMistakes}
-          rows={5}
-          placeholder="记录典型错误、混淆点和思维障碍。"
-          onChange={(event) =>
-            updateField('studentMistakes', event.target.value)
-          }
+          placeholder="记录典型错误、混淆点、思维障碍，并插入对应图形。"
+          onChange={(value) => updateField('studentMistakes', value)}
         />
-      </label>
 
-      <label className="field">
-        <span>改进措施</span>
-        <textarea
-          value={form.improvementActions}
-          rows={4}
-          placeholder="下一次教学准备怎样调整？"
-          onChange={(event) =>
-            updateField('improvementActions', event.target.value)
-          }
+        <RichTextEditor
+          label="教学反思"
+          value={form.teachingReflection}
+          placeholder="记录教学处理中的有效做法和需要调整的环节。"
+          onChange={(value) => updateField('teachingReflection', value)}
         />
-      </label>
 
-      <label className="field">
-        <span>标签</span>
-        <input
-          value={tagsInput}
-          placeholder="使用逗号分隔，例如：函数，定义域"
-          onChange={(event) => {
-            setTagsInput(event.target.value)
-            setDirty(true)
-          }}
+        <RichTextEditor
+          label="经典例题"
+          value={form.classicExample}
+          placeholder="整理题目、关键解法、常用变式和易错步骤。"
+          onChange={(value) => updateField('classicExample', value)}
         />
-      </label>
+      </div>
 
       <div className="editor-actions">
         <button type="submit" className="button button--primary">

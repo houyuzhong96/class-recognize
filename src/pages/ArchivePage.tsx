@@ -2,6 +2,7 @@ import { ArchiveRestore, ArchiveX } from 'lucide-react'
 import { useWorkspace } from '../app/useWorkspace'
 import { EmptyState } from '../components/EmptyState'
 import type { LessonRecord } from '../domain/types'
+import { richTextToPlainText } from '../domain/richText'
 
 interface ArchivePageProps {
   onOpen(record: LessonRecord): void
@@ -36,9 +37,14 @@ export function ArchivePage({ onOpen }: ArchivePageProps) {
                 className="archive-item__main"
                 onClick={() => onOpen(record)}
               >
-                <span>{record.lessonDate}</span>
-                <strong>{record.title || record.lessonType}</strong>
-                <p>{record.teachingSummary || '暂未填写教学总结'}</p>
+                <strong>
+                  {richTextToPlainText(record.teachingSummary).slice(0, 58) ||
+                    '未填写教学总结'}
+                </strong>
+                <p>
+                  {richTextToPlainText(record.studentMistakes).slice(0, 90) ||
+                    '未填写学生易错点'}
+                </p>
               </button>
               <button
                 type="button"

@@ -1,4 +1,5 @@
 import type { LessonRecord } from './types'
+import { richTextToPlainText } from './richText'
 
 export interface ReflectionExport {
   version: 1
@@ -24,22 +25,19 @@ export function recordsToMarkdown(records: LessonRecord[]): string {
     '',
     ...records.map((record) =>
       [
-        `## ${record.lessonDate} ${record.title || record.lessonType}`,
-        '',
-        `- 课型：${record.lessonType}`,
-        `- 标签：${record.tags.join('、') || '无'}`,
+        `## ${richTextToPlainText(record.teachingSummary).slice(0, 40) || '课次记录'}`,
         '',
         '### 教学总结',
-        record.teachingSummary || '未填写',
-        '',
-        '### 教学反思',
-        record.teachingReflection || '未填写',
+        richTextToPlainText(record.teachingSummary) || '未填写',
         '',
         '### 学生易错点',
-        record.studentMistakes || '未填写',
+        richTextToPlainText(record.studentMistakes) || '未填写',
         '',
-        '### 改进措施',
-        record.improvementActions || '未填写',
+        '### 教学反思',
+        richTextToPlainText(record.teachingReflection) || '未填写',
+        '',
+        '### 经典例题',
+        richTextToPlainText(record.classicExample) || '未填写',
       ].join('\n'),
     ),
   ].join('\n\n---\n\n')

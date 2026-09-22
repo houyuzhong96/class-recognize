@@ -6,14 +6,10 @@ function record(overrides: Partial<LessonRecord>): LessonRecord {
   return {
     id: 'record-1',
     sectionId: 'section-1-1-1',
-    lessonDate: '2026-09-22',
-    lessonType: '新授课',
-    title: '本地标题',
-    teachingReflection: '',
-    teachingSummary: '',
+    teachingSummary: '<p>本地总结</p>',
     studentMistakes: '',
-    improvementActions: '',
-    tags: [],
+    teachingReflection: '',
+    classicExample: '',
     version: 1,
     isArchived: false,
     createdAt: '2026-09-22T00:00:00.000Z',
@@ -25,17 +21,17 @@ function record(overrides: Partial<LessonRecord>): LessonRecord {
 describe('mergeRecords', () => {
   it('keeps the most recently updated version of the same record', () => {
     const merged = mergeRecords(
-      [record({ title: '本地标题' })],
+      [record({ teachingSummary: '<p>本地总结</p>' })],
       [
         record({
-          title: '云端标题',
+          teachingSummary: '<p>云端总结</p>',
           updatedAt: '2026-09-22T02:00:00.000Z',
         }),
       ],
     )
 
     expect(merged).toHaveLength(1)
-    expect(merged[0].title).toBe('云端标题')
+    expect(merged[0].teachingSummary).toBe('<p>云端总结</p>')
   })
 
   it('keeps records that exist on only one side', () => {
