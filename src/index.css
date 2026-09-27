@@ -1187,6 +1187,30 @@ textarea:focus-visible {
   margin-bottom: 2px;
 }
 
+.auth-mode-button,
+.auth-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px;
+  border: 0;
+  color: var(--accent-strong);
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.auth-link-button {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.auth-mode-button:hover,
+.auth-link-button:hover {
+  text-decoration: underline;
+}
+
 .form-message {
   margin: 0;
   color: #2c7547;
